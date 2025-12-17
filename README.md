@@ -1,10 +1,11 @@
 #Todo
 
-[x] Taking command line arguments in a rust app.
-[ ] A place to store all todos
-[ ] Create todo
-[ ] Read todo
-[ ] Edit todo
-[ ] Save todo
-[ ] Delete todo
-[ ] Create a package of todo app
+[x] Taking command line arguments in a rust app
+[x] Finding current date and time in rust
+[x] A place to store all entries
+[x] Create entry
+[ ] Read entry
+[ ] Edit entry
+[ ] Save entry
+[ ] Delete entry
+[ ] Create a package of entry app
