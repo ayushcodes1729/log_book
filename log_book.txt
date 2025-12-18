@@ -1,2 +1,17 @@
 2025-12-18 01:46:33.691380
-Hey this is my first entry 
+1. Hey this is my first entry 
+2025-12-18 01:46:33.691380
+2. HelloDate: {date_parts[0]} {date_parts[1]}
+ {content}
+
+Date: '{date_parts[0]}' '{date_parts[1]}'
+ '{content}'
+
+Date: 2025-12-1817:11:45.342654
+Hello brother
+
+
+Date: 2025-12-18 17:20:34.476208
+Hi this is the new entry
+
+

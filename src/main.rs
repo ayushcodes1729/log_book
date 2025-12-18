@@ -1,26 +1,106 @@
-use std::{env, fs};
-use chrono;
-// use fs;``
+use chrono::{self};
+use std::fs::File;
+use std::{fs, io};
+use std::io::Write;
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
-    let mut result_string= String::from("");
-    let current = chrono::offset::Local::now().to_string(); 
-    println!("{current}");
+#[derive(PartialEq)]
+enum Choice {
+    ReadLogs,
+    AddLogs,
+    DeleteLogs,
+    Exit,
+}
+
+fn read_logs() -> String {
+    let logs = fs::read_to_string("./log_book.txt").expect("Expected logs inside log book");
+    logs
+}
+
+fn write_logs(content: &str) {
+    let mut file = fs::OpenOptions::new().append(true).read(true).open("./log_book.txt").expect("A file should be open in append");
+    let current = chrono::offset::Local::now().to_string();
     let date_parts: Vec<&str> = current.split(" ").collect();
-    
-    for s in args {
-        if s == "target/debug/log_book" {
-            continue;
-        }
-        result_string+=&s;
-        result_string+=&String::from(" ");
-    }
-    println!("String from inputs {}", result_string);
-    
-    let to_write = String::from(date_parts[0]) + " " + date_parts[1] + "\n" + &result_string;
+    let to_write = String::from("Date: ") + date_parts[0] + " " + date_parts[1] + "\n" + content + "\n";
+    if let Err(e) = writeln!(file, "{to_write}") {
+        eprintln!("Couldn't write to the file {}", e);
+    };
 
-    let content = fs::write("./log_book.txt", &to_write).expect("Content of the files should be written");
-    
+    println!("Written")
+}
+
+fn delete_logs(log_date: &str) {
+    let logs = fs::read_to_string("./log_book.txt").expect("Expected logs inside log book");
+    let mut i = 0;
+    match logs.find(log_date) {
+        Some(index) => i = index,
+        None => println!("Can't find log of the date")
+    }
+
+    let log_to_end = &logs[i..];
+
+    let line_collection: Vec<&str> = log_to_end.split("\n").collect();
+
+    let req_logs = String::from(line_collection[0]) + "\n" + line_collection[1];
+
+    let mut file = File::open("./log_book.txt").expect("A file should be opened");
+    let mut buf = String::from("");
+
+    buf = buf.replace(&req_logs, "");
+
+    file.write_all(buf.as_bytes()).unwrap();
+
+    println!("Deleted log")
+}
+fn main() {
+    let mut user_choice: String = Default::default();
+
+    let mut choice: Choice = Choice::ReadLogs;
+
+    while choice != Choice::Exit {
+        
+        println!("Select one of the following options:\n1. Read\n2. Create\n3. Delete\n4. Exit");
+
+        user_choice.clear();
+
+        let _user_inp = io::stdin()
+            .read_line(&mut user_choice)
+            .expect("Expected a user input with choice");
+
+        user_choice = user_choice.trim().to_lowercase();
+        if user_choice == "read" {
+            choice = Choice::ReadLogs;
+        } else if user_choice == "create" {
+            choice = Choice::AddLogs;
+        } else if user_choice == "delete" {
+            choice = Choice::DeleteLogs;
+        } else if user_choice == "exit" {
+            choice = Choice::Exit;
+        } else {
+            println!("Wrong choice!")
+        }
+
+        match choice {
+            Choice::ReadLogs => {
+                let read_log = read_logs();
+                println!("{read_log}");
+            }
+            Choice::AddLogs => {
+                let mut log_entry = Default::default();
+                io::stdin().read_line(&mut log_entry).expect("Expect content to enter in the log_book");
+                write_logs(&log_entry);
+                println!("Log written");
+            }
+            Choice::DeleteLogs => {
+                let mut log_date = Default::default();
+                io::stdin().read_line(&mut log_date).expect("Expected a number corresponding a log");
+                delete_logs(&log_date);
+                println!("Log deleted");
+            }
+            Choice::Exit => {
+                break;
+            }
+        }
+    }
+
     println!("Diary logged")
 }
