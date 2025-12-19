@@ -8,4 +8,4 @@
 - [x] Edit entry  
 - [x] Save entry  
 - [x] Delete entry  
-- [ ] Create a package of entry app  
+- [x] Create an executable of the app
