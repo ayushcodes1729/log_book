@@ -1,7 +1,7 @@
 use chrono::{self};
 use std::fs::File;
 use std::{fs, io};
-use std::io::Write;
+use std::io::{Read, Write};
 
 #[derive(PartialEq)]
 enum Choice {
@@ -17,7 +17,7 @@ fn read_logs() -> String {
 }
 
 fn write_logs(content: &str) {
-    let mut file = fs::OpenOptions::new().append(true).read(true).open("./log_book.txt").expect("A file should be open in append");
+    let mut file = fs::OpenOptions::new().write(true).append(true).read(true).open("./log_book.txt").expect("A file should be open in append");
     let current = chrono::offset::Local::now().to_string();
     let date_parts: Vec<&str> = current.split(" ").collect();
     let to_write = String::from("Date: ") + date_parts[0] + " " + date_parts[1] + "\n" + content + "\n";
@@ -41,14 +41,23 @@ fn delete_logs(log_date: &str) {
     let line_collection: Vec<&str> = log_to_end.split("\n").collect();
 
     let req_logs = String::from(line_collection[0]) + "\n" + line_collection[1];
+    println!("{}",req_logs);
 
-    let mut file = File::open("./log_book.txt").expect("A file should be opened");
-    let mut buf = String::from("");
+    
+    let mut file = File::options().write(true).read(true).open("./log_book.txt").expect("A file should be opened in read and write mode");
 
+    let mut buf = String::new(); 
+    file.read_to_string(&mut buf).unwrap();
+    drop(file);
+
+    let mut file2 = File::options().write(true).truncate(true).open("./log_book.txt").expect("A file is expected");
+
+    
     buf = buf.replace(&req_logs, "");
+    
+    file2.write_all(buf.as_bytes()).unwrap();
 
-    file.write_all(buf.as_bytes()).unwrap();
-
+    drop(file2);
     println!("Deleted log")
 }
 fn main() {
@@ -72,6 +81,7 @@ fn main() {
         } else if user_choice == "create" {
             choice = Choice::AddLogs;
         } else if user_choice == "delete" {
+            println!("Enter \"Date <Date from logs> \"");
             choice = Choice::DeleteLogs;
         } else if user_choice == "exit" {
             choice = Choice::Exit;
